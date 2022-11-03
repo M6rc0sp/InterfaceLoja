@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <QMainWindow>
+#include <QLabel>
 #include <incluirlivro.h>
 #include <incluircd.h>
 #include <incluirdvd.h>
@@ -143,11 +144,23 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_tableLivros_cellDoubleClicked(int row, int column);
+
+    void on_tableCDs_cellDoubleClicked(int row, int column);
+
+    void on_tableDVDs_cellDoubleClicked(int row, int column);
+
+    void on_actionIncluir_Livro_triggered();
+
 private:
     Ui::MainWindow *ui;
     Loja x;
+
     Ui::IncluirCD *inclCD;
     Ui::IncluirDVD *inclDVD;
     Ui::IncluirLivro *inclLivro;
+
+    QLabel *total_itens;
 };
 #endif // _LOJA_H_

@@ -4,7 +4,11 @@
 #include <string>
 #include <cmath>
 #include <limits>
+#include <QStatusBar>
 #include "loja.h"
+#include "ui_incluircd.h"
+#include "ui_incluirdvd.h"
+#include "ui_incluirlivro.h"
 #include "ui_mainwindow.h"
 
 using namespace std;
@@ -14,8 +18,21 @@ using namespace std;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , x()
+    , inclCD(nullptr)
+    , inclDVD(nullptr)
+    , inclLivro(nullptr)
+    , total_itens(nullptr)
 {
     ui->setupUi(this);
+    inclCD = new Ui::IncluirCD();
+    inclDVD = new Ui::IncluirDVD();
+    inclLivro = new Ui::IncluirLivro();
+    total_itens = new QLabel;
+
+    statusBar()->insertWidget(0, new QLabel("Total de itens: "));
+    total_itens->setText(&""[(x.getNumLivro()+x.getNumCD()+x.getNumDVD())]);
+    statusBar()->insertWidget(1, total_itens);
 }
 
 MainWindow::~MainWindow()
@@ -396,7 +413,7 @@ DVD Loja::getDVD(int id) const
 
 void Loja::incluirLivro(const Livro& X)
 {
-    //inclLivro->show();
+    //IncluirLivro;
   LL.push_back(X);
 }
 
@@ -525,3 +542,30 @@ bool Loja::salvar(const string& arq) const
   O.close();
   return true;
 }
+
+void MainWindow::on_tableLivros_cellDoubleClicked(int row, int column)
+{
+    int total = row + column;
+    total++;
+}
+
+
+void MainWindow::on_tableCDs_cellDoubleClicked(int row, int column)
+{
+    int total = row + column;
+    total++;
+}
+
+
+void MainWindow::on_tableDVDs_cellDoubleClicked(int row, int column)
+{
+    int total = row + column;
+    total++;
+}
+
+
+void MainWindow::on_actionIncluir_Livro_triggered()
+{
+    inclLivro->getNome->clear();
+}
+
