@@ -2,6 +2,7 @@
 #define INCLUIRDVD_H
 
 #include <QDialog>
+#include <QMessageBox>
 
 namespace Ui {
 class IncluirDVD;
@@ -14,9 +15,23 @@ class IncluirDVD : public QDialog
 public:
     explicit IncluirDVD(QWidget *parent = nullptr);
     ~IncluirDVD();
+    void clear();
+
+private slots:
+    void on_buttonBox_accepted();
+    void on_buttonBox_rejected();
+
+signals:
+    void signIncluirDVD(QString nome, QString preco, QString duracao);
 
 private:
     Ui::IncluirDVD *ui;
+
+    QMessageBox  *erroBox;
+
+    QString nome;
+    QString preco;
+    QString duracao;
 };
 
 #endif // INCLUIRDVD_H

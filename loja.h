@@ -144,23 +144,44 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void atualizaLoja();
+    void atualizaLivros();
+    void atualizaCDs();
+    void atualizaDVDs();
+
 private slots:
+    //Seleção de item na tabela para excluir do vector
     void on_tableLivros_cellDoubleClicked(int row, int column);
-
     void on_tableCDs_cellDoubleClicked(int row, int column);
-
     void on_tableDVDs_cellDoubleClicked(int row, int column);
 
+    //Add Produtos
     void on_actionIncluir_Livro_triggered();
+    void on_actionIncluir_CD_triggered();
+    void on_actionIncluir_DVD_triggered();
+
+    //Slots pra add produtos na loja
+    void slotIncluirLivro(QString nome, QString preco, QString autor);
+    void slotIncluirCD(QString nome, QString preco, QString numfaixas);
+    void slotIncluirDVD(QString nome, QString preco, QString duracao);
+
+    //Funcções IO de Arquivos
+    void on_actionLer_triggered();
+    void on_actionSalvar_triggered();
+    void on_actionSair_triggered();
 
 private:
     Ui::MainWindow *ui;
     Loja x;
 
-    Ui::IncluirCD *inclCD;
-    Ui::IncluirDVD *inclDVD;
-    Ui::IncluirLivro *inclLivro;
+    IncluirCD *inclCD;
+    IncluirDVD *inclDVD;
+    IncluirLivro *inclLivro;
 
     QLabel *total_itens;
+    QLabel *prov;
+    QString info;
+
+    QMessageBox *confirma;
 };
 #endif // _LOJA_H_

@@ -79,6 +79,12 @@
      <height>24</height>
     </rect>
    </property>
+   <property name="cursorPosition">
+    <number>0</number>
+   </property>
+   <property name="cursorMoveStyle">
+    <enum>Qt::VisualMoveStyle</enum>
+   </property>
   </widget>
   <widget class="QLabel" name="labelAutor">
    <property name="geometry">
@@ -115,6 +121,9 @@
      <height>24</height>
     </rect>
    </property>
+   <property name="cursorMoveStyle">
+    <enum>Qt::VisualMoveStyle</enum>
+   </property>
   </widget>
   <widget class="QLineEdit" name="getAutor">
    <property name="geometry">
@@ -124,6 +133,12 @@
      <width>180</width>
      <height>24</height>
     </rect>
+   </property>
+   <property name="cursorPosition">
+    <number>0</number>
+   </property>
+   <property name="cursorMoveStyle">
+    <enum>Qt::VisualMoveStyle</enum>
    </property>
   </widget>
  </widget>

@@ -5,10 +5,8 @@
 #include <cmath>
 #include <limits>
 #include <QStatusBar>
+#include <QFileDialog>
 #include "loja.h"
-#include "ui_incluircd.h"
-#include "ui_incluirdvd.h"
-#include "ui_incluirlivro.h"
 #include "ui_mainwindow.h"
 
 using namespace std;
@@ -24,20 +22,64 @@ MainWindow::MainWindow(QWidget *parent)
     , inclLivro(nullptr)
     , total_itens(nullptr)
 {
+    //instanciando os objetos da classe
     ui->setupUi(this);
-    inclCD = new Ui::IncluirCD();
-    inclDVD = new Ui::IncluirDVD();
-    inclLivro = new Ui::IncluirLivro();
+    inclCD = new IncluirCD(this);
+    inclDVD = new IncluirDVD(this);
+    inclLivro = new IncluirLivro(this);
     total_itens = new QLabel;
 
+    //configurando statusBar
     statusBar()->insertWidget(0, new QLabel("Total de itens: "));
     total_itens->setText(&""[(x.getNumLivro()+x.getNumCD()+x.getNumDVD())]);
     statusBar()->insertWidget(1, total_itens);
+
+    //Configurando Interface das Tabelas
+    //Livro
+    ui->labelLivros->setStyleSheet("lightgray");
+    ui->tableLivros->setStyleSheet("QHeaderView::section{background-color:lightgray}");
+    ui->tableLivros->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
+    ui->tableLivros->horizontalHeader()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
+    ui->tableLivros->horizontalHeader()->setSectionResizeMode(2,QHeaderView::ResizeToContents);
+
+    //CD
+    ui->labelCDs->setStyleSheet("lightgray");
+    ui->tableCDs->setStyleSheet("QHeaderView::section { background-color:lightgray }");
+    ui->tableCDs->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
+    ui->tableCDs->horizontalHeader()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
+    ui->tableCDs->horizontalHeader()->setSectionResizeMode(2,QHeaderView::ResizeToContents);
+
+    //DVD
+    ui->labelDVDs->setStyleSheet("lightgray");
+    ui->tableDVDs->setStyleSheet("QHeaderView::section { background-color:lightgray }");
+    ui->tableDVDs->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
+    ui->tableDVDs->horizontalHeader()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
+    ui->tableDVDs->horizontalHeader()->setSectionResizeMode(2,QHeaderView::ResizeToContents);
+
+    //Conectando sinais e slots de add produtos
+    connect(inclLivro, SIGNAL(signIncluirLivro(QString,QString,QString)), this, SLOT(slotIncluirLivro(QString,QString,QString)) );
+    connect(inclCD, SIGNAL(signIncluirCD(QString,QString,QString)), this, SLOT(slotIncluirCD(QString,QString,QString)) );
+    connect(inclDVD, SIGNAL(signIncluirDVD(QString,QString,QString)), this, SLOT(slotIncluirDVD(QString,QString,QString)) );
+
+    //Caixa para confirmar quando for excluir um item do estoque
+    confirma = new QMessageBox();
+    confirma->setWindowTitle("Excluir item");
+    confirma->setIcon(QMessageBox::Warning);
+    confirma->addButton(QMessageBox::Ok);
+    confirma->addButton(QMessageBox::Cancel);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+
+    delete inclLivro;
+    delete inclCD;
+    delete inclDVD;
+
+    delete total_itens;
+
+    delete confirma;
 }
 
 /// Construtor
@@ -413,7 +455,6 @@ DVD Loja::getDVD(int id) const
 
 void Loja::incluirLivro(const Livro& X)
 {
-    //IncluirLivro;
   LL.push_back(X);
 }
 
@@ -426,7 +467,6 @@ bool Loja::excluirLivro(int id)
 
 void Loja::incluirCD(const CD& X)
 {
-
   LC.push_back(X);
 }
 
@@ -545,27 +585,257 @@ bool Loja::salvar(const string& arq) const
 
 void MainWindow::on_tableLivros_cellDoubleClicked(int row, int column)
 {
-    int total = row + column;
-    total++;
+    confirma->setText("Realmente deseja excluir o Livro "+ QString::fromStdString(x.getLivro(row).getNome()) +" ?");
+    int opcao = confirma->exec();
+
+    switch (opcao) {
+    case QMessageBox::Ok:
+    {
+        if(row < 0 || unsigned(row) > unsigned(x.getNumLivro())) return;
+
+        x.excluirLivro(row);
+        atualizaLoja();
+    }
+        break;
+
+    case QMessageBox::Cancel:
+        confirma->close();
+        break;
+    }
 }
 
 
 void MainWindow::on_tableCDs_cellDoubleClicked(int row, int column)
 {
-    int total = row + column;
-    total++;
+    confirma->setText("Realmente deseja excluir o CD "+ QString::fromStdString(x.getCD(row).getNome()) +" ?");
+    int opcao = confirma->exec();
+
+    switch (opcao) {
+    case QMessageBox::Ok:
+    {
+        if(row < 0 || unsigned(row) > unsigned(x.getNumCD())) return;
+
+        x.excluirCD(row);
+        atualizaLoja();
+    }
+        break;
+
+    case QMessageBox::Cancel:
+        confirma->close();
+        break;
+    }
 }
 
 
 void MainWindow::on_tableDVDs_cellDoubleClicked(int row, int column)
 {
-    int total = row + column;
-    total++;
+        confirma->setText("Realmente deseja excluir o DVD "+ QString::fromStdString(x.getDVD(row).getNome()) +" ?");
+        int opcao = confirma->exec();
+
+        switch (opcao) {
+        case QMessageBox::Ok:
+        {
+            if(row < 0 || unsigned(row) > unsigned(x.getNumDVD())) return;
+
+            x.excluirDVD(row);
+            atualizaLoja();
+        }
+            break;
+
+        case QMessageBox::Cancel:
+            confirma->close();
+            break;
+        }
 }
 
+void MainWindow::on_actionLer_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Ler estoque", QString(), "Text Files (*.txt)");
+
+    if (!x.ler(fileName.toStdString())){
+        QMessageBox::critical(this, "ERRO", "Não foi possível ler o arquivo.");
+    }
+    atualizaLoja();
+}
+
+void MainWindow::on_actionSalvar_triggered()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Salvar estoque", QString(), "Text Files (*.txt)");
+
+    if(!x.salvar(fileName.toStdString())){
+        QMessageBox::critical(this, "ERRO", "Não foi possível salvar o arquivo.");
+    }
+}
+
+void MainWindow::on_actionSair_triggered()
+{
+    QCoreApplication::quit();
+}
 
 void MainWindow::on_actionIncluir_Livro_triggered()
 {
-    inclLivro->getNome->clear();
+    inclLivro->clear();
+    inclLivro->show();
 }
 
+void MainWindow::on_actionIncluir_CD_triggered()
+{
+    inclCD->clear();
+    inclCD->show();
+}
+
+void MainWindow::on_actionIncluir_DVD_triggered()
+{
+    inclDVD->clear();
+    inclDVD->show();
+}
+
+void MainWindow::slotIncluirLivro(QString nome, QString preco, QString autor)
+{
+    x.incluirLivro(Livro(nome.toStdString(), round(preco.toFloat() *100.0), autor.toStdString()));
+    atualizaLoja();
+}
+void MainWindow::slotIncluirCD(QString nome, QString preco, QString numfaixas)
+{
+    x.incluirCD(CD(nome.toStdString(), (int)round(preco.toFloat() *100.0), (int)numfaixas.toFloat()));
+    atualizaLoja();
+}
+void MainWindow::slotIncluirDVD(QString nome, QString preco, QString duracao)
+{
+    x.incluirDVD(DVD(nome.toStdString(), (int)round(preco.toFloat() *100.0), (int)duracao.toFloat()));
+    atualizaLoja();
+}
+
+void MainWindow::atualizaLoja()
+{
+    atualizaLivros();
+    atualizaCDs();
+    atualizaDVDs();
+
+    QString total_i = QString::number(x.getNumCD() + x.getNumDVD() + x.getNumLivro());
+    total_itens->setText(total_i);
+}
+
+void MainWindow::atualizaLivros()
+{
+    ui->tableLivros->clearContents();
+
+    ui->tableLivros->setRowCount(x.getNumLivro());
+
+    for(int i=0; i<ui->tableLivros->rowCount(); ++i)
+    {
+
+        for(int j=0; j<=2; ++j)
+        {
+            prov = new QLabel();
+
+            Livro L = x.getLivro(i);
+
+            if(j==0)
+            {
+                info = QString::fromStdString(L.getNome());
+                prov->setText(info);
+                prov->setAlignment(Qt::AlignLeft | Qt::AlignCenter);
+                ui->tableLivros->setCellWidget(i, j, prov);
+            }
+
+            else if(j==1)
+            {
+                info = QString::number(L.getPreco(), 'f', 2);
+                prov->setText(info);
+                prov->setAlignment(Qt::AlignRight | Qt::AlignCenter);
+                ui->tableLivros->setCellWidget(i, j, prov);
+            }
+
+            else
+            {
+                info = QString::fromStdString(L.getAutor());
+                prov->setText(info);
+                prov->setAlignment(Qt::AlignLeft | Qt::AlignCenter);
+                ui->tableLivros->setCellWidget(i, j, prov);
+            }
+        }
+    }
+}
+
+void MainWindow::atualizaCDs()
+{
+    ui->tableCDs->clearContents();
+
+    ui->tableCDs->setRowCount(x.getNumCD());
+
+    for(int i=0; i<ui->tableCDs->rowCount(); ++i)
+    {
+
+        for(int j=0; j<=2; ++j)
+        {
+            prov = new QLabel();
+            CD cd = x.getCD(i);
+
+            if(j==0)
+            {
+                info = QString::fromStdString(cd.getNome());
+                prov->setText(info);
+                prov->setAlignment(Qt::AlignLeft | Qt::AlignCenter);
+                ui->tableCDs->setCellWidget(i, j, prov);
+            }
+
+            else if(j==1)
+            {
+                info = QString::number(cd.getPreco(), 'f', 2);
+                prov->setText(info);
+                prov->setAlignment(Qt::AlignRight | Qt::AlignCenter);
+                ui->tableCDs->setCellWidget(i, j, prov);
+            }
+
+            else
+            {
+                info = QString::number(cd.getNumFaixas());
+                prov->setText(info);
+                prov->setAlignment(Qt::AlignCenter | Qt::AlignCenter);
+                ui->tableCDs->setCellWidget(i, j, prov);
+            }
+        }
+    }
+}
+
+void MainWindow::atualizaDVDs()
+{
+    ui->tableDVDs->clearContents();
+
+    ui->tableDVDs->setRowCount(x.getNumDVD());
+
+    for(int i=0; i<ui->tableDVDs->rowCount(); ++i)
+    {
+
+        for(int j=0; j<=2; ++j)
+        {
+            prov = new QLabel();
+            DVD dvd = x.getDVD(i);
+
+            if(j==0)
+            {
+                info = QString::fromStdString(dvd.getNome());
+                prov->setText(info);
+                prov->setAlignment(Qt::AlignLeft | Qt::AlignCenter);
+                ui->tableDVDs->setCellWidget(i, j, prov);
+            }
+
+            else if(j==1)
+            {
+                info = QString::number(dvd.getPreco(), 'f', 2);
+                prov->setText(info);
+                prov->setAlignment(Qt::AlignRight | Qt::AlignCenter);
+                ui->tableDVDs->setCellWidget(i, j, prov);
+            }
+
+            else
+            {
+                info = QString::number(dvd.getDuracao());
+                prov->setText(info);
+                prov->setAlignment(Qt::AlignCenter | Qt::AlignCenter);
+                ui->tableDVDs->setCellWidget(i, j, prov);
+            }
+        }
+    }
+}
