@@ -63,7 +63,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     //Caixa para confirmar quando for excluir um item do estoque
     confirma = new QMessageBox();
-    confirma->setWindowTitle("Excluir item");
     confirma->setIcon(QMessageBox::Warning);
     confirma->addButton(QMessageBox::Ok);
     confirma->addButton(QMessageBox::Cancel);
@@ -585,6 +584,7 @@ bool Loja::salvar(const string& arq) const
 
 void MainWindow::on_tableLivros_cellDoubleClicked(int row, int column)
 {
+    confirma->setWindowTitle("Excluir Livro");
     confirma->setText("Realmente deseja excluir o Livro "+ QString::fromStdString(x.getLivro(row).getNome()) +" ?");
     int opcao = confirma->exec();
 
@@ -607,6 +607,7 @@ void MainWindow::on_tableLivros_cellDoubleClicked(int row, int column)
 
 void MainWindow::on_tableCDs_cellDoubleClicked(int row, int column)
 {
+    confirma->setWindowTitle("Excluir CD");
     confirma->setText("Realmente deseja excluir o CD "+ QString::fromStdString(x.getCD(row).getNome()) +" ?");
     int opcao = confirma->exec();
 
@@ -629,6 +630,7 @@ void MainWindow::on_tableCDs_cellDoubleClicked(int row, int column)
 
 void MainWindow::on_tableDVDs_cellDoubleClicked(int row, int column)
 {
+        confirma->setWindowTitle("Excluir DVD");
         confirma->setText("Realmente deseja excluir o DVD "+ QString::fromStdString(x.getDVD(row).getNome()) +" ?");
         int opcao = confirma->exec();
 
